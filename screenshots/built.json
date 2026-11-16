@@ -1,0 +1,40 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Sable Table",
+      "hasCanvas": false,
+      "bodyTextLen": 184,
+      "bodyTextHash": "7e2eefde137d73c20a3701b436ffe369870b51096e4c8b550418e17615eca19d",
+      "bodyTextPrefix": "Sable Table Pickup from the pass Orders Bag 0 TONIGHT A short me",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Sable Table",
+      "hasCanvas": false,
+      "bodyTextLen": 733,
+      "bodyTextHash": "d0eaae5aeb94128e2f92faf32d5f1c88a0482a3a62892fa290ac8d1dba60e4a1",
+      "bodyTextPrefix": "Sable Table Pickup from the pass Orders Bag 0 TONIGHT A short me",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/built.json",
+  "divergesFromBaseline": true,
+  "baselineReasons": [
+    "desktop: body text collapsed (733 -> 184 chars)"
+  ]
+}

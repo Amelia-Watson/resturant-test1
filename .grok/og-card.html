@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @font-face {
+        font-family: "Fraunces";
+        src: url("fonts/Fraunces-latin.woff2") format("woff2");
+        font-weight: 560;
+        font-style: normal;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Outfit";
+        src: url("fonts/Outfit-latin.woff2") format("woff2");
+        font-weight: 500;
+        font-style: normal;
+        font-display: block;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: #f3eee6;
+      }
+      .card {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background:
+          radial-gradient(ellipse at 50% 46%, #f8f4ee 0%, #f3eee6 58%, #e7dccb 100%);
+        color: #1c1712;
+      }
+      .grain {
+        position: absolute;
+        inset: 0;
+        width: 1200px;
+        height: 630px;
+        opacity: 0.18;
+        mix-blend-mode: multiply;
+        pointer-events: none;
+      }
+      .frame,
+      .frame-inner {
+        position: absolute;
+        pointer-events: none;
+      }
+      .frame {
+        inset: 28px;
+        border: 1.5px solid #c9bba8;
+      }
+      .frame-inner {
+        inset: 36px;
+        border: 1px solid #e3d8c8;
+      }
+      .lockup {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        padding: 0 160px;
+      }
+      .name {
+        margin: 0;
+        font-family: "Fraunces", "Liberation Serif", serif;
+        font-weight: 560;
+        font-size: 128px;
+        line-height: 0.86;
+        letter-spacing: -0.035em;
+        color: #1c1712;
+      }
+      .rule {
+        width: 148px;
+        height: 3px;
+        margin: 22px auto;
+        background: #b4532a;
+        border-radius: 2px;
+      }
+      .tag {
+        margin: 28px 0 0;
+        font-family: "Outfit", "Liberation Sans", sans-serif;
+        font-weight: 500;
+        font-size: 20px;
+        line-height: 1;
+        letter-spacing: 0.34em;
+        text-transform: uppercase;
+        color: #3d4a38;
+        padding-left: 0.34em;
+      }
+      .sprig {
+        position: absolute;
+        z-index: 1;
+        width: 168px;
+        height: 72px;
+      }
+      .sprig.left {
+        left: 72px;
+        bottom: 58px;
+      }
+      .sprig.right {
+        right: 72px;
+        bottom: 58px;
+        transform: scaleX(-1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <svg class="grain" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <filter id="paper">
+          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#paper)" />
+      </svg>
+      <div class="frame"></div>
+      <div class="frame-inner"></div>
+      <svg class="sprig left" viewBox="0 0 180 76" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M6 58 C 42 54, 86 42, 172 16" fill="none" stroke="#3d4a38" stroke-width="1.6" stroke-linecap="round" />
+        <ellipse cx="38" cy="48" rx="16" ry="6" transform="rotate(-26 38 48)" fill="#3d4a38" />
+        <ellipse cx="66" cy="56" rx="14" ry="5.2" transform="rotate(22 66 56)" fill="#3d4a38" />
+        <ellipse cx="96" cy="42" rx="16" ry="5.8" transform="rotate(-20 96 42)" fill="#3d4a38" />
+        <ellipse cx="124" cy="46" rx="13" ry="5" transform="rotate(24 124 46)" fill="#3d4a38" />
+        <ellipse cx="150" cy="30" rx="14" ry="5.2" transform="rotate(-16 150 30)" fill="#3d4a38" />
+        <circle cx="54" cy="40" r="3.1" fill="#b4532a" />
+        <circle cx="132" cy="34" r="2.8" fill="#b4532a" />
+      </svg>
+      <svg class="sprig right" viewBox="0 0 180 76" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M6 58 C 42 54, 86 42, 172 16" fill="none" stroke="#3d4a38" stroke-width="1.6" stroke-linecap="round" />
+        <ellipse cx="38" cy="48" rx="16" ry="6" transform="rotate(-26 38 48)" fill="#3d4a38" />
+        <ellipse cx="66" cy="56" rx="14" ry="5.2" transform="rotate(22 66 56)" fill="#3d4a38" />
+        <ellipse cx="96" cy="42" rx="16" ry="5.8" transform="rotate(-20 96 42)" fill="#3d4a38" />
+        <ellipse cx="124" cy="46" rx="13" ry="5" transform="rotate(24 124 46)" fill="#3d4a38" />
+        <ellipse cx="150" cy="30" rx="14" ry="5.2" transform="rotate(-16 150 30)" fill="#3d4a38" />
+        <circle cx="54" cy="40" r="3.1" fill="#b4532a" />
+        <circle cx="132" cy="34" r="2.8" fill="#b4532a" />
+      </svg>
+      <div class="lockup">
+        <p class="name">Sable</p>
+        <div class="rule"></div>
+        <p class="name">Table</p>
+        <p class="tag">Pickup from the pass</p>
+      </div>
+    </div>
+  </body>
+</html>
