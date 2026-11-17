@@ -16,6 +16,7 @@ type MenuRow = {
 
 type OrderRow = {
   code: string;
+  table_no: number | null;
   items: string;
   total_cents: number;
   note: string;
@@ -41,6 +42,7 @@ function mapTicket(row: OrderRow): Ticket {
     : "pending";
   return {
     code: row.code,
+    tableNo: row.table_no == null ? null : Number(row.table_no),
     items,
     totalCents: Number(row.total_cents),
     note: row.note,
@@ -71,9 +73,13 @@ export const listMenu = createServerFn({ method: "GET" }).handler(async () => {
   return rows.map(mapMenu);
 });
 
+const TABLE_MIN = 1;
+const TABLE_MAX = 999;
+
 export const placeOrder = createServerFn({ method: "POST" })
   .validator(
     z.object({
+      tableNo: z.number().int().min(TABLE_MIN).max(TABLE_MAX),
       items: z.array(lineInput).min(1).max(20),
       note: z.string().max(140).optional(),
     }),
@@ -88,7 +94,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     for (const item of data.items) {
       const dish = byId.get(item.id);
       if (!dish || !dish.available) {
-        throw new Error("Something on the ticket is no longer available.");
+        throw new Error("Something on the order is no longer available.");
       }
       lines.push({
         id: dish.id,
@@ -99,36 +105,25 @@ export const placeOrder = createServerFn({ method: "POST" })
     }
     const totalCents = lines.reduce((sum, line) => sum + line.priceCents * line.qty, 0);
     const note = (data.note ?? "").trim();
-    let code = ticketCode();
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const existing = await sql<{ code: string }>`select code from orders where code = ${code}`;
-      if (existing.length === 0) break;
-      code = ticketCode();
-    }
+    const code = ticketCode();
     await sql`
-      insert into orders (code, items, total_cents, note, status)
-      values (${code}, ${JSON.stringify(lines)}, ${totalCents}, ${note}, 'pending')
+      insert into orders (code, table_no, items, total_cents, note, status)
+      values (${code}, ${data.tableNo}, ${JSON.stringify(lines)}, ${totalCents}, ${note}, 'pending')
     `;
-    return { code, totalCents };
+    return { code, tableNo: data.tableNo, totalCents };
   });
 
-export const getTickets = createServerFn({ method: "POST" })
-  .validator(z.object({ codes: z.array(z.string().min(4).max(8)).max(40) }))
+export const getTableOrders = createServerFn({ method: "POST" })
+  .validator(z.object({ tableNo: z.number().int().min(TABLE_MIN).max(TABLE_MAX) }))
   .handler(async ({ data }) => {
     const sql = await getSql();
-    const tickets: Ticket[] = [];
-    const seen = new Set<string>();
-    for (const raw of data.codes) {
-      const code = raw.trim().toUpperCase();
-      if (seen.has(code)) continue;
-      seen.add(code);
-      const rows = await sql<OrderRow>`
-        select code, items, total_cents, note, status, created_at::text as created_at
-        from orders where code = ${code}
-      `;
-      if (rows[0]) tickets.push(mapTicket(rows[0]));
-    }
-    return tickets;
+    const rows = await sql<OrderRow>`
+      select code, table_no, items, total_cents, note, status, created_at::text as created_at
+      from orders
+      where table_no = ${data.tableNo}
+      order by created_at asc
+    `;
+    return rows.map(mapTicket);
   });
 
 function assertPin(pin: string) {
@@ -141,30 +136,35 @@ export const kitchenOrders = createServerFn({ method: "POST" })
     assertPin(data.pin);
     const sql = await getSql();
     const rows = await sql<OrderRow>`
-      select code, items, total_cents, note, status, created_at::text as created_at
+      select code, table_no, items, total_cents, note, status, created_at::text as created_at
       from orders
-      order by created_at desc
-      limit 80
+      order by table_no asc, created_at asc
+      limit 200
     `;
     return rows.map(mapTicket);
   });
 
-export const setOrderStatus = createServerFn({ method: "POST" })
+export const setTableStatus = createServerFn({ method: "POST" })
   .validator(
     z.object({
       pin: z.string(),
-      code: z.string().min(4).max(8),
+      tableNo: z.number().int().min(TABLE_MIN).max(TABLE_MAX),
       status: z.enum(STATUSES),
     }),
   )
   .handler(async ({ data }) => {
     assertPin(data.pin);
     const sql = await getSql();
-    const code = data.code.toUpperCase();
-    const updated = await sql<{ code: string }>`
-      update orders set status = ${data.status} where code = ${code} returning code
+    await sql`
+      update orders set status = ${data.status}
+      where table_no = ${data.tableNo}
+        and status <> 'collected'
     `;
-    if (!updated[0]) throw new Error("Ticket not found.");
+    if (data.status === "collected") {
+      await sql`
+        update orders set status = 'collected' where table_no = ${data.tableNo}
+      `;
+    }
     return { ok: true as const };
   });
 

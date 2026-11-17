@@ -19,6 +19,7 @@ export type OrderLine = {
 
 export type Ticket = {
   code: string;
+  tableNo: number | null;
   items: OrderLine[];
   totalCents: number;
   note: string;

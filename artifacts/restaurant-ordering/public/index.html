@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Food – Bella Italia</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="header">
+    <div>
+      <h1>🍝 Bella Italia</h1>
+      <div class="subtitle">Fresh Italian · Pickup</div>
+    </div>
+    <button class="cart-btn" id="openCart">
+      🛒 Cart <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </header>
+
+  <div class="container">
+    <div class="categories" id="categories"></div>
+    <div class="menu-grid" id="menuGrid">
+      <div class="empty">Loading menu…</div>
+    </div>
+  </div>
+
+  <!-- Cart Drawer -->
+  <div class="overlay" id="overlay"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h2>Your Order</h2>
+      <button class="close-btn" id="closeCart">×</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Total</span>
+        <span id="cartTotal">$0.00</span>
+      </div>
+      <div id="checkoutSection" style="display:none;">
+        <div class="form-group">
+          <label>Your Name *</label>
+          <input type="text" id="customerName" placeholder="John Doe" required />
+        </div>
+        <div class="form-group">
+          <label>Phone *</label>
+          <input type="tel" id="customerPhone" placeholder="+1 555 123 4567" required />
+        </div>
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <textarea id="customerNotes" rows="2" placeholder="No onions, extra sauce…"></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%" id="placeOrderBtn">Place Order</button>
+      </div>
+      <button class="btn btn-primary" style="width:100%" id="checkoutBtn">Checkout</button>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal" id="successModal">
+    <div class="modal-content">
+      <div style="font-size:3rem;">✅</div>
+      <h2>Order Placed!</h2>
+      <p>Your order number is</p>
+      <div class="order-id" id="orderIdDisplay"></div>
+      <p>Show this number when you pick up.<br>We’ll have it ready soon.</p>
+      <button class="btn btn-primary" id="closeModal">Done</button>
+    </div>
+  </div>
+
+  <script src="/js/customer.js"></script>
+</body>
+</html>

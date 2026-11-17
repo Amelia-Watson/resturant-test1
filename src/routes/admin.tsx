@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { kitchenOrders, listMenu, saveDish, setDishAvailable, setOrderStatus } from "@/lib/ordering.functions";
+import { kitchenOrders, listMenu, saveDish, setDishAvailable, setTableStatus } from "@/lib/ordering.functions";
 import { money, STATUSES, statusLabel, type MenuItem, type OrderStatus, type Ticket } from "@/lib/order-model";
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
@@ -61,8 +61,8 @@ function AdminPage() {
     return () => window.clearInterval(timer);
   }, [authed, pin]);
 
-  async function advance(code: string, status: OrderStatus) {
-    await setOrderStatus({ data: { pin, code, status } });
+  async function advance(tableNo: number, status: OrderStatus) {
+    await setTableStatus({ data: { pin, tableNo, status } });
     await reload();
   }
 
@@ -142,38 +142,59 @@ function AdminPage() {
       <main className="mx-auto max-w-5xl px-4 py-6">
         {view === "orders" ? (
           <ul className="space-y-3">
-            {orders.length === 0 ? <li className="text-muted">No tickets yet.</li> : null}
-            {orders.map((ticket) => (
-              <li key={ticket.code} className="rounded-card border border-line bg-surface p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="font-display text-3xl tracking-widest">{ticket.code}</p>
-                    <p className="text-sm text-muted">
-                      {statusLabel(ticket.status)} · {money(ticket.totalCents)}
-                    </p>
-                    <p className="mt-2 text-sm">
-                      {ticket.items.map((line) => `${line.qty}× ${line.name}`).join(", ")}
-                    </p>
-                    {ticket.note ? <p className="mt-1 text-sm text-muted">{ticket.note}</p> : null}
+            {orders.length === 0 ? <li className="text-muted">No tables yet.</li> : null}
+            {Array.from(
+              orders.reduce((map, ticket) => {
+                const key = ticket.tableNo ?? 0;
+                const list = map.get(key) ?? [];
+                list.push(ticket);
+                map.set(key, list);
+                return map;
+              }, new Map<number, typeof orders>()),
+            ).map(([tableNo, tickets]) => {
+              const open = tickets.filter((t) => t.status !== "collected");
+              const shown = open.length ? open : tickets;
+              const lines = new Map<string, { name: string; qty: number }>();
+              for (const ticket of shown) {
+                for (const line of ticket.items) {
+                  const prev = lines.get(line.id);
+                  if (prev) prev.qty += line.qty;
+                  else lines.set(line.id, { name: line.name, qty: line.qty });
+                }
+              }
+              const total = shown.reduce((s, t) => s + t.totalCents, 0);
+              const notes = shown.map((t) => t.note).filter(Boolean);
+              return (
+                <li key={tableNo} className="rounded-card border border-line bg-surface p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-display text-3xl">{tableNo ? `Table ${tableNo}` : "No table"}</p>
+                      <p className="text-sm text-muted">
+                        {shown.length} round{shown.length === 1 ? "" : "s"} · {money(total)}
+                      </p>
+                      <p className="mt-2 text-sm">
+                        {[...lines.values()].map((line) => `${line.qty}× ${line.name}`).join(", ")}
+                      </p>
+                      {notes.length ? <p className="mt-1 text-sm text-muted">{notes.join(" · ")}</p> : null}
+                    </div>
+                    {tableNo ? (
+                      <div className="flex flex-wrap gap-2">
+                        {STATUSES.map((status) => (
+                          <button
+                            key={status}
+                            type="button"
+                            onClick={() => void advance(tableNo, status)}
+                            className="min-h-11 rounded-full border border-line px-3 text-sm"
+                          >
+                            {statusLabel(status)}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {STATUSES.map((status) => (
-                      <button
-                        key={status}
-                        type="button"
-                        disabled={ticket.status === status}
-                        onClick={() => void advance(ticket.code, status)}
-                        className={`min-h-11 rounded-full px-3 text-sm ${
-                          ticket.status === status ? "bg-olive text-surface" : "border border-line"
-                        }`}
-                      >
-                        {statusLabel(status)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
